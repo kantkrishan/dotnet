@@ -22,10 +22,12 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet build --no-restore
-    - name: SonarQube Scan
-      uses: sonarsource/sonarqube-scan-action@master
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+    - name: Sonar-scan
+      shell: bash
+      run: |
+        dotnet tool install -g dotnet-sonarscanner --version 5.7.2
+        dotnet sonarscanner begin /k:"test-milind-api" /d:sonar.host.url="https://api-sonarqube.dso.preproduction.smp.bcg.com" /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+        dotnet build .
+        dotnet sonarscanner end /d:sonar.login=${{ secrets.SONAR_TOKEN }}
     - name: Test
       run: dotnet test --no-build --verbosity normal
